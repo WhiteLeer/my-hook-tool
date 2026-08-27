@@ -1,0 +1,13 @@
+{
+  "id": "HSR-4.4-MUMU",
+  "game": "HSR",
+  "version": "4.4",
+  "captureExtensions": [ ".srrdc" ],
+  "renderDocExportFormat": "RenderDocShaderExport/2",
+  "alignmentPolicy": "explicit-only",
+  "notes": [
+    "RenderDoc ResourceId is capture-local and is not an AS PathID.",
+    "Shader and material links are emitted only from an explicit link map.",
+    "Reconstructed HLSL remains capture-derived and may still require Unity adaptation."
+  ]
+}

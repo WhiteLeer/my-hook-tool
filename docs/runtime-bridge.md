@@ -1,0 +1,42 @@
+# Runtime Bridge Protocol
+
+运行时桥接模块由目标进程加载，使用环境变量找到当前会话：
+
+- `MY_HOOK_PROFILE`：Profile ID。
+- `MY_HOOK_OUTPUT`：runtime 输出目录。
+- `MY_HOOK_EVENTS`：NDJSON 事件文件的绝对路径。
+- `MY_HOOK_FILE`：当前 `.hook` 文件路径。
+
+桥接模块以 UTF-8、逐行追加的方式写入 `MY_HOOK_EVENTS`。每一行必须是一个
+JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
+
+```json
+{
+  "schema": "my-hook.runtime-event.v1",
+  "kind": "material",
+  "source": {
+    "layer": "unity-runtime",
+    "profile": "HSR-4.4-MUMU"
+  },
+  "payload": {
+    "instanceId": 123,
+    "name": "Eff_Glow_44_OneChannel_15",
+    "shaderName": "miHoYo/CRP_Particles/Particle_OneChannel",
+    "shaderPathId": -7177827563780441733,
+    "properties": {},
+    "textures": []
+  }
+}
+```
+
+## 记录原则
+
+- 只写实际从目标运行时读取到的值；未知字段省略或写 `null`。
+- Unity `PathID`、对象实例 ID、文件路径和 GPU `ResourceId` 必须分开保存。
+- 不根据名称、顺序或近似值推断材质与 Shader 关系。
+- 事件文件由桥接模块负责追加，`my-hook-tool finalize` 只负责校验 JSON、合并
+  记录并更新会话状态。
+
+当前 `attach` 的 Windows 注入器只验证目标模块是否成功加载。MUMU 的 Android
+客体桥接仍需在客体进程中加载对应 ARM64 模块；将 Windows DLL 注入
+`MuMuNxMain.exe` 不能自动获得客体 Unity 对象数据。
