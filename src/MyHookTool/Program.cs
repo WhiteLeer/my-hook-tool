@@ -177,6 +177,8 @@ internal static class Program
             records.Add(record);
         }
         hook["records"] = records;
+        if (options.GetValueOrDefault("typetree") is { } typeTreePath)
+            hook["typetree"] = CopyTypeTree(hookDir, typeTreePath);
         var session = hook["session"]?.AsObject() ?? new JsonObject();
         session["status"] = records.Count == 0 ? "no_records" : "completed";
         session["finishedUtc"] = DateTime.UtcNow.ToString("O");
@@ -185,6 +187,33 @@ internal static class Program
         Console.WriteLine($"已合并运行时记录: {records.Count}");
         PrintHookSummary(hook);
         return 0;
+    }
+
+    private static JsonObject CopyTypeTree(string hookDir, string sourceValue)
+    {
+        var source = FullPath(sourceValue);
+        if (!File.Exists(source))
+            throw new FileNotFoundException("找不到 TypeTree 文件", source);
+        var extension = Path.GetExtension(source);
+        var accepted = new[] { ".ttbin", ".tpk", ".txt", ".json" };
+        if (!accepted.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            throw new InvalidDataException($"不支持的 TypeTree 文件扩展名: {extension}");
+
+        var targetDirectory = Path.Combine(hookDir, "runtime", "typetree");
+        Directory.CreateDirectory(targetDirectory);
+        var target = Path.Combine(targetDirectory, Path.GetFileName(source));
+        File.Copy(source, target, true);
+        return new JsonObject
+        {
+            ["status"] = "attached",
+            ["format"] = extension.Equals(".ttbin", StringComparison.OrdinalIgnoreCase)
+                ? "TypeTreeRipper.ttbin"
+                : extension.TrimStart('.'),
+            ["file"] = RelativeTo(hookDir, target),
+            ["sourceFile"] = Path.GetFileName(source),
+            ["size"] = new FileInfo(target).Length,
+            ["sha256"] = Sha256(target)
+        };
     }
 
     private static int AttachMumu(string[] args)
@@ -681,6 +710,8 @@ internal static class Program
             Console.WriteLine($"捕获: {hook["source"]?["capture"]?.GetValue<string>()}, Shader: {summary["uniqueShaders"] ?? "?"}, Variant: {summary["uniqueVariants"] ?? "?"}, EID: {summary["events"] ?? "?"}");
         if (hook["session"] is JsonObject session)
             Console.WriteLine($"会话: {session["id"] ?? "?"}, 状态: {session["status"] ?? "?"}, PID: {session["targetPid"] ?? "?"}");
+        if (hook["typetree"] is JsonObject typeTree)
+            Console.WriteLine($"TypeTree: {typeTree["format"] ?? "?"}, {typeTree["size"] ?? "?"} bytes");
         Console.WriteLine($"AS Shader: {hook["as"]?["shaderCount"] ?? 0}, Material: {hook["as"]?["materialCount"] ?? 0}");
         Console.WriteLine($"运行时记录: {hook["records"]?.AsArray().Count ?? 0}, 显式关联: {hook["links"]?.AsArray().Count ?? 0}, 未解决: {hook["unresolved"]?.AsArray().Count ?? 0}");
     }
@@ -703,6 +734,7 @@ internal static class Program
         Console.WriteLine("my-hook-tool mumu --mumu-root <dir> --module <bridge.dll> --output <dir> [options]");
         Console.WriteLine("  --vmindex <index>   MUMU 实例编号，默认 0");
         Console.WriteLine("my-hook-tool finalize <session.hook>");
+        Console.WriteLine("  --typetree <file>   将 TypeTreeRipper 的 .ttbin/.tpk/结构文件挂入 .hook");
     }
 
     private const uint CreateSuspended = 0x00000004;

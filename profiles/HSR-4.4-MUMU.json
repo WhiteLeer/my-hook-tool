@@ -4,6 +4,8 @@
   "version": "4.4",
   "captureExtensions": [ ".srrdc" ],
   "renderDocExportFormat": "RenderDocShaderExport/2",
+  "typeTreeProvider": "TypeTreeRipper",
+  "typeTreeFormats": [ ".ttbin", ".tpk", ".txt" ],
   "alignmentPolicy": "explicit-only",
   "notes": [
     "RenderDoc ResourceId is capture-local and is not an AS PathID.",

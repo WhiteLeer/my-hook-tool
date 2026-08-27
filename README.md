@@ -48,6 +48,16 @@ my-hook-tool.exe finalize '<session>\<session>.hook'
 my-hook-tool.exe inspect '<session>\<session>.hook'
 ```
 
+如果同时运行了 TypeTreeRipper，可在整理会话时附加其输出：
+
+```powershell
+my-hook-tool.exe finalize '<session>\<session>.hook' `
+  --typetree 'D:\path\to\release.ttbin'
+```
+
+`.hook` 会记录 TypeTree 的来源、格式、大小和 SHA-256；它不会把 TypeTree
+误标记为材质或 Shader 数据。
+
 SR 分支也提供 MUMU 重启和早期注入编排。该命令会停止指定 VM、挂起启动
 `MuMuNxMain.exe`、加载桥接 DLL、恢复宿主，再启动 VM：
 

@@ -7,6 +7,17 @@
 - `MY_HOOK_EVENTS`：NDJSON 事件文件的绝对路径。
 - `MY_HOOK_FILE`：当前 `.hook` 文件路径。
 
+TypeTreeRipper 输出可以在会话结束时通过 `finalize --typetree` 挂入：
+
+```powershell
+my-hook-tool.exe finalize '<session>\<session>.hook' `
+  --typetree 'D:\path\to\release.ttbin'
+```
+
+文件会复制到 `.hook` 会话的 `runtime/typetree/`，并记录 TypeTree 格式、大小、
+SHA-256 和原文件名。当前工具不重新解释 TypeTree 二进制；`.tpk` 或结构文本
+仍保留为原始证据，转换继续使用 TypeTreeRipper 自带 Converter。
+
 桥接模块以 UTF-8、逐行追加的方式写入 `MY_HOOK_EVENTS`。每一行必须是一个
 JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
 
