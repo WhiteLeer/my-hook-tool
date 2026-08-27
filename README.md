@@ -67,7 +67,9 @@ my-hook-tool.exe mumu `
   --mumu-root 'D:\Unpack_Workspace\Games_MUMU\MuMuPlayerGlobal' `
   --vmindex 0 `
   --module 'D:\path\to\hsr-runtime-bridge.dll' `
-  --output 'D:\Unpack_Workspace\HookSessions'
+  --output 'D:\Unpack_Workspace\HookSessions' `
+  --launch-package 'com.miHoYo.hkrpg' `
+  --watch
 ```
 
 `mumu` 只负责 Windows 宿主侧加载模块，不等于已经进入 Android 客体。客体
@@ -79,6 +81,12 @@ my-hook-tool.exe mumu `
 一样手动按键截帧；桥接模块产生的新事件会追加到会话中。按 `Ctrl+C`，或目标
 进程退出时，工具会自动将事件合并回 `.hook` 并结束会话。也可以给 CLI 传入
 `--duration-seconds N`，在 N 秒后自动收尾。
+
+窗口中的“目标程序”列表由当前 VM 的 `pm list packages -3` 返回值生成，显示的
+是实际包名。选择包名后，工具会在 VM 启动、宿主注入完成且 Android 客体可用时，
+通过 MuMu CLI 请求启动该程序；选择“不自动启动”则保持原来的只启动 VM 流程。
+如果 VM 尚未运行或 ADB 尚未上线，列表会显示不可用提示；启动 VM 后点击“刷新”
+即可重新读取，工具不会根据包名猜测程序名称。
 
 这里的“自动采集”不是定时重复扫描：每条运行时记录只写入一次。当前仓库附带的
 `my-hook-runtime-probe.dll` 仅用于验证 Windows 宿主注入链路，记录内容是

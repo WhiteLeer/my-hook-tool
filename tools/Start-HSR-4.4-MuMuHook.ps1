@@ -36,17 +36,32 @@ function Read-Settings {
     catch { return $null }
 }
 
-function Save-Settings([string]$Mumu, [string]$Bridge, [string]$Output, [int]$Index) {
+function Save-Settings([string]$Mumu, [string]$Bridge, [string]$Output, [int]$Index, [string]$Target) {
     New-Item -ItemType Directory -Force -Path $settingsDirectory | Out-Null
     [ordered]@{
         MuMuRoot = $Mumu
         BridgeModule = $Bridge
         OutputDirectory = $Output
         VmIndex = $Index
+        TargetPackage = $Target
     } | ConvertTo-Json | Set-Content -LiteralPath $settingsPath -Encoding UTF8
 }
 
-function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string]$InitialOutput, [int]$InitialIndex) {
+function Get-MuMuPackages([string]$Root, [int]$Index) {
+    $cli = Join-Path $Root 'nx_main\mumu-cli.exe'
+    if (!(Test-Path -LiteralPath $cli -PathType Leaf)) { return @() }
+    try {
+        $lines = @(& $cli adb --vmindex $Index --cmd 'shell pm list packages -3' 2>$null)
+        $packages = foreach ($line in $lines) {
+            if ($line -match '^\s*package:(\S+)') { $Matches[1] }
+        }
+        return @($packages | Sort-Object -Unique | ForEach-Object {
+            [pscustomobject]@{ Display = $_; Package = $_ }
+        })
+    } catch { return @() }
+}
+
+function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string]$InitialOutput, [int]$InitialIndex, [string]$InitialTarget) {
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     [System.Windows.Forms.Application]::EnableVisualStyles()
@@ -55,18 +70,18 @@ function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string
     $form.Text = 'HSR 4.4 Runtime Hook + MuMu'
     $form.StartPosition = 'CenterScreen'
     $form.AutoScaleMode = 'Dpi'
-    $form.MinimumSize = New-Object System.Drawing.Size(820, 300)
-    $form.ClientSize = New-Object System.Drawing.Size(900, 330)
+    $form.MinimumSize = New-Object System.Drawing.Size(820, 390)
+    $form.ClientSize = New-Object System.Drawing.Size(900, 440)
 
     $layout = New-Object System.Windows.Forms.TableLayoutPanel
     $layout.Dock = 'Fill'
     $layout.Padding = New-Object System.Windows.Forms.Padding(14)
     $layout.ColumnCount = 3
-    $layout.RowCount = 6
+    $layout.RowCount = 8
     $layout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle('Absolute', 150)))
     $layout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle('Percent', 100)))
     $layout.ColumnStyles.Add((New-Object System.Windows.Forms.ColumnStyle('Absolute', 100)))
-    foreach($height in @(42, 42, 42, 42, 36, 52)) {
+    foreach($height in @(42, 42, 42, 42, 42, 42, 36, 52)) {
         $layout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle('Absolute', $height)))
     }
     $form.Controls.Add($layout)
@@ -125,11 +140,53 @@ function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string
     $layout.Controls.Add($indexLabel, 0, 4)
     $layout.Controls.Add($indexBox, 1, 4)
 
+    $targetLabel = New-Object System.Windows.Forms.Label
+    $targetLabel.Text = '目标程序'
+    $targetLabel.Anchor = 'Left,Right'
+    $targetLabel.TextAlign = 'MiddleLeft'
+    $targetCombo = New-Object System.Windows.Forms.ComboBox
+    $targetCombo.Dock = 'Fill'
+    $targetCombo.DropDownStyle = 'DropDownList'
+    $targetCombo.DisplayMember = 'Display'
+    $refreshButton = New-Object System.Windows.Forms.Button
+    $refreshButton.Text = '刷新'
+    $refreshButton.Dock = 'Fill'
+    $layout.Controls.Add($targetLabel, 0, 5)
+    $layout.Controls.Add($targetCombo, 1, 5)
+    $layout.Controls.Add($refreshButton, 2, 5)
+
+    function Update-TargetPackages {
+        $targetCombo.Items.Clear()
+        [void]$targetCombo.Items.Add([pscustomobject]@{ Display = '[不自动启动]'; Package = '' })
+        try {
+            $root = Resolve-MuMuRoot $mumuBox.Text
+            $items = @(Get-MuMuPackages $root ([int]$indexBox.Value))
+            foreach ($item in $items) { [void]$targetCombo.Items.Add($item) }
+            if ($items.Count -eq 0) {
+                [void]$targetCombo.Items.Add([pscustomobject]@{ Display = '[未读取到应用，请启动 VM 后刷新]'; Package = '' })
+            }
+        } catch {
+            [void]$targetCombo.Items.Add([pscustomobject]@{ Display = '[MUMU 未运行或 ADB 不可用]'; Package = '' })
+        }
+        $targetCombo.SelectedIndex = 0
+        if (![string]::IsNullOrWhiteSpace($InitialTarget)) {
+            for ($i = 0; $i -lt $targetCombo.Items.Count; $i++) {
+                if ($targetCombo.Items[$i].Package -eq $InitialTarget) {
+                    $targetCombo.SelectedIndex = $i
+                    break
+                }
+            }
+        }
+    }
+    $refreshButton.Add_Click({ Update-TargetPackages })
+    $mumuBox.Add_Leave({ try { Update-TargetPackages } catch {} })
+    $indexBox.Add_ValueChanged({ try { Update-TargetPackages } catch {} })
+
     $hint = New-Object System.Windows.Forms.Label
-    $hint.Text = '先停止 VM，再挂起启动 MuMuNxMain.exe 并注入；本工具不截取 RDC。'
+    $hint.Text = '列表来自当前 VM 的 ADB 包名；先停止 VM，再挂起注入宿主并自动启动所选程序。'
     $hint.ForeColor = [System.Drawing.Color]::DimGray
     $hint.AutoSize = $true
-    $layout.Controls.Add($hint, 0, 5)
+    $layout.Controls.Add($hint, 0, 6)
     $layout.SetColumnSpan($hint, 2)
 
     $start = New-Object System.Windows.Forms.Button
@@ -147,6 +204,7 @@ function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string
                 BridgeModule = [IO.Path]::GetFullPath($bridgeBox.Text)
                 OutputDirectory = [IO.Path]::GetFullPath($outputBox.Text)
                 VmIndex = [int]$indexBox.Value
+                TargetPackage = [string]$targetCombo.SelectedItem.Package
             }
             $form.DialogResult = 'OK'
             $form.Close()
@@ -162,10 +220,11 @@ function Show-ConfigDialog([string]$InitialMumu, [string]$InitialBridge, [string
     $buttons.Dock = 'Fill'
     $buttons.Controls.Add($cancel)
     $buttons.Controls.Add($start)
-    $layout.Controls.Add($buttons, 2, 5)
+    $layout.Controls.Add($buttons, 2, 7)
 
     $form.AcceptButton = $start
     $form.CancelButton = $cancel
+    Update-TargetPackages
     if ($form.ShowDialog() -ne 'OK') { return $null }
     return $form.Tag
 }
@@ -176,22 +235,25 @@ $initialMumu = if ($MuMuRoot) { $MuMuRoot } elseif ($settings.MuMuRoot) { $setti
 $initialBridge = if ($BridgeModule) { $BridgeModule } elseif ($settings.BridgeModule) { $settings.BridgeModule } else { '' }
 $initialOutput = if ($OutputDirectory) { $OutputDirectory } elseif ($settings.OutputDirectory) { $settings.OutputDirectory } else { $defaultWorkspace }
 $initialIndex = if ($PSBoundParameters.ContainsKey('VmIndex')) { $VmIndex } elseif ($settings.VmIndex -ne $null) { [int]$settings.VmIndex } else { 0 }
+$initialTarget = if ($settings.TargetPackage) { [string]$settings.TargetPackage } else { '' }
 
 if (!$NoDialog) {
-    $selection = Show-ConfigDialog $initialMumu $initialBridge $initialOutput $initialIndex
+    $selection = Show-ConfigDialog $initialMumu $initialBridge $initialOutput $initialIndex $initialTarget
     if ($null -eq $selection) { exit 0 }
     $MuMuRoot = $selection.MuMuRoot
     $BridgeModule = $selection.BridgeModule
     $OutputDirectory = $selection.OutputDirectory
     $VmIndex = $selection.VmIndex
+    $TargetPackage = $selection.TargetPackage
 } else {
     $MuMuRoot = Resolve-MuMuRoot $initialMumu
     if (!(Test-Path -LiteralPath $initialBridge -PathType Leaf)) { throw "桥接 DLL 不存在：$initialBridge" }
     $BridgeModule = [IO.Path]::GetFullPath($initialBridge)
     $OutputDirectory = [IO.Path]::GetFullPath($initialOutput)
+    $TargetPackage = $initialTarget
 }
 
-Save-Settings (Resolve-MuMuRoot $MuMuRoot) ([IO.Path]::GetFullPath($BridgeModule)) ([IO.Path]::GetFullPath($OutputDirectory)) $VmIndex
+Save-Settings (Resolve-MuMuRoot $MuMuRoot) ([IO.Path]::GetFullPath($BridgeModule)) ([IO.Path]::GetFullPath($OutputDirectory)) $VmIndex $TargetPackage
 if (!(Test-Path -LiteralPath $toolPath -PathType Leaf)) {
     if (!(Test-Path -LiteralPath $dotnetPath -PathType Leaf)) {
         throw "找不到已构建的 my-hook-tool.exe，也找不到 .NET 8：$toolPath"
@@ -209,6 +271,9 @@ $arguments = @(
     '--output', ([IO.Path]::GetFullPath($OutputDirectory)),
     '--watch'
 )
+if (![string]::IsNullOrWhiteSpace($TargetPackage)) {
+    $arguments += @('--launch-package', $TargetPackage)
+}
 Write-Host '启动 HSR 4.4 MUMU 运行时注入...' -ForegroundColor Cyan
 if ($toolInvocation.Count -eq 1) {
     & $toolInvocation[0] @arguments

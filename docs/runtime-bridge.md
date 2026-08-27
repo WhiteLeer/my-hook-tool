@@ -55,5 +55,7 @@ JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
 `MuMuNxMain.exe` 不能自动获得客体 Unity 对象数据。
 
 SR 分支的 `mumu` 命令只是在既有 MUMU 重启流程中复用 Windows 宿主注入，目的
-是保证模块尽早加载。它不会把 ARM64 `.so` 自动注入 Android 客体，也不会把
-宿主进程的模块信息当作 Unity 资源信息。
+是保证模块尽早加载。传入 `--launch-package <id>` 只会通过 ADB 请求启动已安装
+的 Android 程序，不等于向该程序注入 ARM64 `.so`；它也不会把宿主进程的模块
+信息当作 Unity 资源信息。仓库内一键脚本会在 MuMu VM 仍可查询时列出第三方包，
+并把用户选择的真实包名传给该参数；无法查询时不会自动猜测目标程序。

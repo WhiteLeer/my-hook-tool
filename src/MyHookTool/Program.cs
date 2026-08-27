@@ -357,12 +357,55 @@ internal static class Program
 
         Console.WriteLine("启动指定 MUMU 实例...");
         RunProcess(mumuCli, new[] { "control", "--vmindex", parsedVmIndex.ToString(), "--version", "15", "launch" });
+        if (options.GetValueOrDefault("launch-package") is { } packageName)
+            LaunchMumuPackage(mumuCli, parsedVmIndex, packageName, options.GetValueOrDefault("launch-timeout-seconds"));
         Console.WriteLine($"宿主已注入，PID {targetPid}；会话: {hookPath}");
         if (ShouldWatch(options))
             WatchSession(hookPath, eventsPath, targetPid, options);
         else
             Console.WriteLine("运行时桥接模块应向 runtime/events.ndjson 追加 JSON Lines；完成后执行 finalize。");
         return 0;
+    }
+
+    private static void LaunchMumuPackage(
+        string mumuCli,
+        int vmIndex,
+        string packageName,
+        string? timeoutValue)
+    {
+        if (string.IsNullOrWhiteSpace(packageName) ||
+            packageName.Any(character => !(char.IsLetterOrDigit(character) || character is '.' or '_' or '-')))
+            throw new ArgumentException("--launch-package 必须是合法的 Android 包名");
+
+        var timeoutSeconds = 30;
+        if (timeoutValue is not null &&
+            (!int.TryParse(timeoutValue, out timeoutSeconds) || timeoutSeconds <= 0))
+            throw new ArgumentException("--launch-timeout-seconds 必须是正整数");
+
+        var command = $"shell monkey -p {packageName} -c android.intent.category.LAUNCHER 1";
+        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
+        Exception? lastError = null;
+        Console.WriteLine($"等待 Android 客体上线并启动程序: {packageName}");
+        while (DateTime.UtcNow < deadline)
+        {
+            try
+            {
+                RunProcess(mumuCli, new[]
+                {
+                    "adb", "--vmindex", vmIndex.ToString(), "--cmd", command
+                });
+                Console.WriteLine($"已请求启动程序: {packageName}");
+                return;
+            }
+            catch (InvalidOperationException ex)
+            {
+                lastError = ex;
+                Thread.Sleep(1000);
+            }
+        }
+
+        throw new TimeoutException(
+            $"Android 客体在 {timeoutSeconds} 秒内未能启动程序 {packageName}: {lastError?.Message ?? "未知错误"}");
     }
 
     private static string ResolveMumuRoot(string value)
@@ -720,7 +763,8 @@ internal static class Program
         Console.Write(stdout.Result);
         var error = stderr.Result;
         if (process.ExitCode != 0)
-            throw new InvalidOperationException($"RenderDoc 导出失败，退出码 {process.ExitCode}: {error.Trim()}");
+            throw new InvalidOperationException(
+                $"外部进程 {Path.GetFileName(executable)} 执行失败，退出码 {process.ExitCode}: {error.Trim()}");
         if (!string.IsNullOrWhiteSpace(error)) Console.Error.WriteLine(error.Trim());
     }
 
@@ -835,6 +879,8 @@ internal static class Program
         Console.WriteLine("  --duration-seconds N 注入后采集 N 秒并自动 finalize");
         Console.WriteLine("my-hook-tool mumu --mumu-root <dir> --module <bridge.dll> --output <dir> [options]");
         Console.WriteLine("  --vmindex <index>   MUMU 实例编号，默认 0");
+        Console.WriteLine("  --launch-package <id> 启动已安装的 Android 程序");
+        Console.WriteLine("  --launch-timeout-seconds N 等待客体上线的最长时间");
         Console.WriteLine("  --watch              注入后持续采集，目标退出或 Ctrl+C 时自动 finalize");
         Console.WriteLine("  --duration-seconds N 注入后采集 N 秒并自动 finalize");
         Console.WriteLine("my-hook-tool finalize <session.hook>");
