@@ -1,0 +1,12 @@
+{
+  "id": "ZZZ-3.0-MUMU",
+  "game": "ZZZ",
+  "version": "3.0",
+  "captureExtensions": [ ".zzzrdc" ],
+  "alignmentPolicy": "explicit-only",
+  "notes": [
+    "This profile reserves the ZZZ runtime bridge namespace.",
+    "Do not reuse HSR offsets, TypeTree assumptions or object layouts.",
+    "The guest bridge must provide records from the ZZZ runtime layer."
+  ]
+}
