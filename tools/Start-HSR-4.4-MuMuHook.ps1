@@ -206,7 +206,8 @@ $arguments = @(
     '--mumu-root', (Resolve-MuMuRoot $MuMuRoot),
     '--vmindex', $VmIndex.ToString(),
     '--module', ([IO.Path]::GetFullPath($BridgeModule)),
-    '--output', ([IO.Path]::GetFullPath($OutputDirectory))
+    '--output', ([IO.Path]::GetFullPath($OutputDirectory)),
+    '--watch'
 )
 Write-Host '启动 HSR 4.4 MUMU 运行时注入...' -ForegroundColor Cyan
 if ($toolInvocation.Count -eq 1) {

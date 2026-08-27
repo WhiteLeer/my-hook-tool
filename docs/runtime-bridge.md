@@ -18,7 +18,9 @@ my-hook-tool.exe finalize '<session>\<session>.hook' `
 SHA-256 和原文件名。当前工具不重新解释 TypeTree 二进制；`.tpk` 或结构文本
 仍保留为原始证据，转换继续使用 TypeTreeRipper 自带 Converter。
 
-桥接模块以 UTF-8、逐行追加的方式写入 `MY_HOOK_EVENTS`。每一行必须是一个
+桥接模块以 UTF-8、逐行追加的方式写入 `MY_HOOK_EVENTS`。采集期间不需要工具
+反复重建 `.hook`；工具只监听目标进程生命周期，结束时再读取事件文件一次。
+每一行必须是一个
 JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
 
 ```json
@@ -45,8 +47,8 @@ JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
 - 只写实际从目标运行时读取到的值；未知字段省略或写 `null`。
 - Unity `PathID`、对象实例 ID、文件路径和 GPU `ResourceId` 必须分开保存。
 - 不根据名称、顺序或近似值推断材质与 Shader 关系。
-- 事件文件由桥接模块负责追加，`my-hook-tool finalize` 只负责校验 JSON、合并
-  记录并更新会话状态。
+- 事件文件由桥接模块负责追加，`my-hook-tool finalize` 或 `attach/mumu --watch`
+  的自动收尾只负责校验 JSON、合并记录并更新会话状态。
 
 当前 `attach` 的 Windows 注入器只验证目标模块是否成功加载。MUMU 的 Android
 客体桥接仍需在客体进程中加载对应 ARM64 模块；将 Windows DLL 注入

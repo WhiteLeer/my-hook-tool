@@ -40,7 +40,7 @@ my-hook-tool.exe attach --profile .\profiles\HSR-4.4-MUMU.json `
 ```
 
 命令会生成 `<session>/<session>.hook` 和
-`<session>/runtime/events.ndjson`。桥接模块按
+`<session>/runtime/events.ndjson`。`.hook` 在注入后立即创建，桥接模块按
 [`docs/runtime-bridge.md`](docs/runtime-bridge.md) 追加记录，之后执行：
 
 ```powershell
@@ -72,6 +72,18 @@ my-hook-tool.exe mumu `
 
 `mumu` 只负责 Windows 宿主侧加载模块，不等于已经进入 Android 客体。客体
 桥接模块和客体注入器必须另行提供。
+
+仓库内的一键脚本
+[`tools/Start-HSR-4.4-MuMuHook.bat`](tools/Start-HSR-4.4-MuMuHook.bat)
+会启动上述 `mumu --watch` 流程。它会在注入后持续等待，不需要像 RenderDoc
+一样手动按键截帧；桥接模块产生的新事件会追加到会话中。按 `Ctrl+C`，或目标
+进程退出时，工具会自动将事件合并回 `.hook` 并结束会话。也可以给 CLI 传入
+`--duration-seconds N`，在 N 秒后自动收尾。
+
+这里的“自动采集”不是定时重复扫描：每条运行时记录只写入一次。当前仓库附带的
+`my-hook-runtime-probe.dll` 仅用于验证 Windows 宿主注入链路，记录内容是
+`bridge_probe`，不代表已经采集到 Unity 的 Shader、材质或 TypeTree。要获取这些
+客体数据，仍需实现并加载对应的 Android/Unity 客体桥接模块。
 
 ## 分支
 

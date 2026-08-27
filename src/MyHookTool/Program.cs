@@ -149,7 +149,10 @@ internal static class Program
         WriteSessionHook(hookPath, profile, sessionName, targetPid, targetPath, module, eventsPath, "injected");
 
         Console.WriteLine($"已生成会话: {hookPath}");
-        Console.WriteLine("运行时桥接模块应向 runtime/events.ndjson 追加 JSON Lines；完成后执行 finalize。");
+        if (ShouldWatch(options))
+            WatchSession(hookPath, eventsPath, targetPid, options);
+        else
+            Console.WriteLine("运行时桥接模块应向 runtime/events.ndjson 追加 JSON Lines；完成后执行 finalize。");
         return 0;
     }
 
@@ -168,16 +171,26 @@ internal static class Program
         if (!File.Exists(eventsPath))
             throw new FileNotFoundException("找不到运行时事件文件", eventsPath);
 
-        var records = new JsonArray();
-        foreach (var line in File.ReadLines(eventsPath))
-        {
-            if (string.IsNullOrWhiteSpace(line)) continue;
-            var record = JsonNode.Parse(line)?.AsObject()
-                ?? throw new InvalidDataException("运行时事件不是 JSON 对象");
-            records.Add(record);
-        }
+        FinalizeSessionFile(
+            hookPath,
+            eventsPath,
+            ignoreIncompleteTail: false,
+            options.GetValueOrDefault("typetree"));
+        return 0;
+    }
+
+    private static void FinalizeSessionFile(
+        string hookPath,
+        string eventsPath,
+        bool ignoreIncompleteTail,
+        string? typeTreePath)
+    {
+        var hook = JsonNode.Parse(File.ReadAllText(hookPath))?.AsObject()
+            ?? throw new InvalidDataException(".hook 不是 JSON 对象");
+        var hookDir = Path.GetDirectoryName(hookPath)!;
+        var records = ReadEventRecords(eventsPath, ignoreIncompleteTail);
         hook["records"] = records;
-        if (options.GetValueOrDefault("typetree") is { } typeTreePath)
+        if (typeTreePath is not null)
             hook["typetree"] = CopyTypeTree(hookDir, typeTreePath);
         var session = hook["session"]?.AsObject() ?? new JsonObject();
         session["status"] = records.Count == 0 ? "no_records" : "completed";
@@ -186,7 +199,91 @@ internal static class Program
         File.WriteAllText(hookPath, hook.ToJsonString(JsonOptions));
         Console.WriteLine($"已合并运行时记录: {records.Count}");
         PrintHookSummary(hook);
-        return 0;
+    }
+
+    private static JsonArray ReadEventRecords(string eventsPath, bool ignoreIncompleteTail)
+    {
+        var records = new JsonArray();
+        var lines = File.ReadAllLines(eventsPath);
+        for (var index = 0; index < lines.Length; index++)
+        {
+            var line = lines[index];
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            try
+            {
+                var record = JsonNode.Parse(line)?.AsObject()
+                    ?? throw new InvalidDataException("运行时事件不是 JSON 对象");
+                records.Add(record);
+            }
+            catch (JsonException) when (ignoreIncompleteTail && index == lines.Length - 1)
+            {
+                Console.WriteLine("忽略事件文件末尾未完成的 JSON 行。");
+            }
+        }
+        return records;
+    }
+
+    private static void WatchSession(
+        string hookPath,
+        string eventsPath,
+        int targetPid,
+        Dictionary<string, List<string>> options)
+    {
+        var stopRequested = false;
+        ConsoleCancelEventHandler cancelHandler = (_, eventArgs) =>
+        {
+            eventArgs.Cancel = true;
+            stopRequested = true;
+        };
+        Console.CancelKeyPress += cancelHandler;
+        try
+        {
+            var duration = ParseDuration(options.GetValueOrDefault("duration-seconds"));
+            DateTime? deadline = duration is null ? null : DateTime.UtcNow.Add(duration.Value);
+            Console.WriteLine("运行时采集已启动：只追加新事件，不重复扫描；按 Ctrl+C 完成会话。 ");
+            while (!stopRequested && IsProcessRunning(targetPid) &&
+                   (deadline is null || DateTime.UtcNow < deadline.Value))
+            {
+                Thread.Sleep(250);
+            }
+            if (deadline is not null && DateTime.UtcNow >= deadline.Value)
+                Console.WriteLine($"已达到采集时长 {duration?.TotalSeconds:0} 秒，自动完成会话。");
+            else if (!stopRequested && !IsProcessRunning(targetPid))
+                Console.WriteLine("目标进程已退出，自动完成会话。");
+            FinalizeSessionFile(hookPath, eventsPath, ignoreIncompleteTail: true, typeTreePath: null);
+        }
+        finally
+        {
+            Console.CancelKeyPress -= cancelHandler;
+        }
+    }
+
+    private static TimeSpan? ParseDuration(string? value)
+    {
+        if (value is null) return null;
+        if (!int.TryParse(value, out var seconds) || seconds <= 0)
+            throw new ArgumentException("--duration-seconds 必须是正整数");
+        return TimeSpan.FromSeconds(seconds);
+    }
+
+    private static bool ShouldWatch(Dictionary<string, List<string>> options) =>
+        options.ContainsKey("watch") || options.ContainsKey("duration-seconds");
+
+    private static bool IsProcessRunning(int processId)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            return !process.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
     }
 
     private static JsonObject CopyTypeTree(string hookDir, string sourceValue)
@@ -261,7 +358,10 @@ internal static class Program
         Console.WriteLine("启动指定 MUMU 实例...");
         RunProcess(mumuCli, new[] { "control", "--vmindex", parsedVmIndex.ToString(), "--version", "15", "launch" });
         Console.WriteLine($"宿主已注入，PID {targetPid}；会话: {hookPath}");
-        Console.WriteLine("请由客体桥接模块向 runtime/events.ndjson 追加记录，再执行 finalize。");
+        if (ShouldWatch(options))
+            WatchSession(hookPath, eventsPath, targetPid, options);
+        else
+            Console.WriteLine("运行时桥接模块应向 runtime/events.ndjson 追加 JSON Lines；完成后执行 finalize。");
         return 0;
     }
 
@@ -731,8 +831,12 @@ internal static class Program
         Console.WriteLine("  --target-pid <pid>  向已运行进程注入，而不是启动新进程");
         Console.WriteLine("  --arguments <text>  目标进程参数");
         Console.WriteLine("  --name <name>       会话目录和 .hook 文件名");
+        Console.WriteLine("  --watch              注入后持续采集，目标退出或 Ctrl+C 时自动 finalize");
+        Console.WriteLine("  --duration-seconds N 注入后采集 N 秒并自动 finalize");
         Console.WriteLine("my-hook-tool mumu --mumu-root <dir> --module <bridge.dll> --output <dir> [options]");
         Console.WriteLine("  --vmindex <index>   MUMU 实例编号，默认 0");
+        Console.WriteLine("  --watch              注入后持续采集，目标退出或 Ctrl+C 时自动 finalize");
+        Console.WriteLine("  --duration-seconds N 注入后采集 N 秒并自动 finalize");
         Console.WriteLine("my-hook-tool finalize <session.hook>");
         Console.WriteLine("  --typetree <file>   将 TypeTreeRipper 的 .ttbin/.tpk/结构文件挂入 .hook");
     }
