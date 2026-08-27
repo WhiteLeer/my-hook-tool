@@ -28,6 +28,7 @@ internal static class Program
             {
                 "export" => Export(args[1..]),
                 "attach" => Attach(args[1..]),
+                "mumu" => AttachMumu(args[1..]),
                 "finalize" => FinalizeSession(args[1..]),
                 "inspect" => Inspect(args[1..]),
                 _ => Fail($"未知命令: {args[0]}")
@@ -184,6 +185,64 @@ internal static class Program
         Console.WriteLine($"已合并运行时记录: {records.Count}");
         PrintHookSummary(hook);
         return 0;
+    }
+
+    private static int AttachMumu(string[] args)
+    {
+        var options = ParseOptions(args);
+        var profile = LoadProfile(options.GetValueOrDefault("profile"));
+        var module = RequiredPath(options, "module");
+        var mumuRoot = ResolveMumuRoot(RequiredValue(options, "mumu-root"));
+        var vmIndex = options.GetValueOrDefault("vmindex") ?? "0";
+        if (!int.TryParse(vmIndex, out var parsedVmIndex) || parsedVmIndex < 0)
+            throw new ArgumentException("--vmindex 必须是非负整数");
+        var mumuCli = Path.Combine(mumuRoot, "nx_main", "mumu-cli.exe");
+        var mumuHost = Path.Combine(mumuRoot, "nx_main", "MuMuNxMain.exe");
+        if (!File.Exists(mumuCli) || !File.Exists(mumuHost))
+            throw new FileNotFoundException("MUMU 安装不完整，需要 nx_main\\mumu-cli.exe 和 MuMuNxMain.exe", mumuRoot);
+
+        var outputRoot = FullPath(RequiredValue(options, "output"));
+        Directory.CreateDirectory(outputRoot);
+        var profileId = StringValue(profile, "id") ?? "runtime";
+        var sessionName = SanitizeFileName(options.GetValueOrDefault("name") ??
+            $"{profileId}_{DateTime.UtcNow:yyyyMMdd_HHmmssfff}");
+        var sessionDir = Path.Combine(outputRoot, sessionName);
+        Directory.CreateDirectory(sessionDir);
+        var runtimeDir = Path.Combine(sessionDir, "runtime");
+        Directory.CreateDirectory(runtimeDir);
+        var eventsPath = Path.Combine(runtimeDir, "events.ndjson");
+        File.WriteAllText(eventsPath, string.Empty);
+        var hookPath = Path.Combine(sessionDir, sessionName + ".hook");
+
+        Console.WriteLine("停止指定 MUMU 实例，避免桥接模块加载过晚...");
+        RunProcess(mumuCli, new[] { "control", "--vmindex", parsedVmIndex.ToString(), "shutdown" });
+        RunProcess(mumuCli, new[] { "main", "close" });
+        Thread.Sleep(6000);
+
+        var targetPid = LaunchSuspendedAndInject(
+            mumuHost,
+            string.Empty,
+            Path.Combine(mumuRoot, "nx_main"),
+            module,
+            profileId,
+            eventsPath,
+            hookPath);
+        WriteSessionHook(hookPath, profile, sessionName, targetPid, mumuHost, module, eventsPath, "injected");
+
+        Console.WriteLine("启动指定 MUMU 实例...");
+        RunProcess(mumuCli, new[] { "control", "--vmindex", parsedVmIndex.ToString(), "--version", "15", "launch" });
+        Console.WriteLine($"宿主已注入，PID {targetPid}；会话: {hookPath}");
+        Console.WriteLine("请由客体桥接模块向 runtime/events.ndjson 追加记录，再执行 finalize。");
+        return 0;
+    }
+
+    private static string ResolveMumuRoot(string value)
+    {
+        var path = FullPath(value);
+        if (File.Exists(path) && string.Equals(Path.GetFileName(path), "MuMuNxMain.exe", StringComparison.OrdinalIgnoreCase))
+            path = Directory.GetParent(Path.GetDirectoryName(path)!)!.FullName;
+        if (Directory.Exists(Path.Combine(path, "nx_main"))) return path;
+        throw new DirectoryNotFoundException($"找不到 MUMU 根目录或 MuMuNxMain.exe: {value}");
     }
 
     private static void WriteSessionHook(
@@ -641,6 +700,8 @@ internal static class Program
         Console.WriteLine("  --target-pid <pid>  向已运行进程注入，而不是启动新进程");
         Console.WriteLine("  --arguments <text>  目标进程参数");
         Console.WriteLine("  --name <name>       会话目录和 .hook 文件名");
+        Console.WriteLine("my-hook-tool mumu --mumu-root <dir> --module <bridge.dll> --output <dir> [options]");
+        Console.WriteLine("  --vmindex <index>   MUMU 实例编号，默认 0");
         Console.WriteLine("my-hook-tool finalize <session.hook>");
     }
 

@@ -48,6 +48,21 @@ my-hook-tool.exe finalize '<session>\<session>.hook'
 my-hook-tool.exe inspect '<session>\<session>.hook'
 ```
 
+SR 分支也提供 MUMU 重启和早期注入编排。该命令会停止指定 VM、挂起启动
+`MuMuNxMain.exe`、加载桥接 DLL、恢复宿主，再启动 VM：
+
+```powershell
+my-hook-tool.exe mumu `
+  --profile .\profiles\HSR-4.4-MUMU.json `
+  --mumu-root 'D:\Unpack_Workspace\Games_MUMU\MuMuPlayerGlobal' `
+  --vmindex 0 `
+  --module 'D:\path\to\hsr-runtime-bridge.dll' `
+  --output 'D:\Unpack_Workspace\HookSessions'
+```
+
+`mumu` 只负责 Windows 宿主侧加载模块，不等于已经进入 Android 客体。客体
+桥接模块和客体注入器必须另行提供。
+
 ## 分支
 
 - `SR-4.4-MUMU`：HSR 4.4 运行时桥接协议和注入配置。

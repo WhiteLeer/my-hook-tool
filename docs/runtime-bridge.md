@@ -40,3 +40,7 @@ JSON 对象，且包含 `schema`、`kind`、`source` 和 `payload`：
 当前 `attach` 的 Windows 注入器只验证目标模块是否成功加载。MUMU 的 Android
 客体桥接仍需在客体进程中加载对应 ARM64 模块；将 Windows DLL 注入
 `MuMuNxMain.exe` 不能自动获得客体 Unity 对象数据。
+
+SR 分支的 `mumu` 命令只是在既有 MUMU 重启流程中复用 Windows 宿主注入，目的
+是保证模块尽早加载。它不会把 ARM64 `.so` 自动注入 Android 客体，也不会把
+宿主进程的模块信息当作 Unity 资源信息。
