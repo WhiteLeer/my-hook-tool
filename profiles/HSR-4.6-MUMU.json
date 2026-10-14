@@ -1,0 +1,27 @@
+{
+  "id": "HSR-4.6-MUMU",
+  "game": "HSR",
+  "version": "4.6",
+  "observedClientVersion": "4.6.0",
+  "runtimeSupport": "discovery-only",
+  "unity": "2019.4.34f1",
+  "androidPackage": "com.miHoYo.hkrpg",
+  "mumuAndroidVersion": "auto",
+  "captureExtensions": [ ".srrdc" ],
+  "alignmentPolicy": "explicit-only",
+  "runtimeValidation": {
+    "status": "pending",
+    "installedVersionCode": 118,
+    "architecture": "arm64-v8a",
+    "unityVersionEvidence": "Version strings in the official APK libunity.so; runtime ABI not validated.",
+    "libunitySha256": "867e896398bef4225ddc7b07c062f686fed0af9d321eb980d1335ad01f688f9e",
+    "apkSha256": "07234d7e0f7fe0d083bab06a9504fea0604d6c80187f518774e55d3270e7d123",
+    "verifiedNativeClassIds": []
+  },
+  "notes": [
+    "Actual installed version was verified with dumpsys package on 2026-10-14.",
+    "The 4.6 libunity.so differs from the verified 4.5 image. No old RVA, ABI slot or TypeTree is accepted as 4.6 evidence.",
+    "Native injection remains disabled until a new version-specific minimal experiment verifies the runtime interface.",
+    "Read-only catalog and loaded ELF-header metadata were observed on 2026-10-14. Target ELF machine 183 differs from the x86_64 observer; ABI is not validated."
+  ]
+}

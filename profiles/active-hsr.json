@@ -1,0 +1,7 @@
+{
+  "schema": "my-hook.active-target.v1",
+  "profile": "HSR-4.6-MUMU",
+  "version": "4.6",
+  "validation": "discovery-only",
+  "updated": "2026-10-14"
+}

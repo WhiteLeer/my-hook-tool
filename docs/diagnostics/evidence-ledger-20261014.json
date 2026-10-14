@@ -1,0 +1,84 @@
+{
+  "schema": "my-hook.evidence-ledger.v2",
+  "date": "2026-10-14",
+  "activeTarget": "HSR-4.6-MUMU",
+  "historicalShaderFixture": "HSR-4.5",
+  "claims": [
+    {
+      "id": "installed-client-version",
+      "status": "confirmed",
+      "value": "4.6.0 / versionCode 118",
+      "evidence": [{"file": "artifacts/status/20261014/client-version.json", "field": "clientVersion"}]
+    },
+    {
+      "id": "runtime-catalog",
+      "status": "observed",
+      "rows": 182,
+      "sha256": "f834b6c1c3e256f1ebfbf6508bc81ed37abfc7b4e2883bb14937916d2d7e534b",
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-catalog-only-20261014/HSR-4.6-MUMU_20261014_044638353/runtime/typetree/rtti-catalog.txt", "lines": [16, 28, 66, 123]}],
+      "doesNotProve": ["field-level TypeTree", "Transfer call", "factory ABI", "runtime Material identity"]
+    },
+    {
+      "id": "runtime-architecture-boundary",
+      "status": "observed",
+      "runtimeArchitecture": "x86_64",
+      "runtimeModuleIdentityScope": "Ripper library only, not libunity",
+      "apkArchitecture": "arm64-v8a",
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-catalog-only-20261014/HSR-4.6-MUMU_20261014_044638353/runtime/events.ndjson", "lines": [1, 2, 69], "eventSequences": [0, 1, 2]}],
+      "doesNotProve": ["native game-library ABI compatibility"]
+    },
+    {
+      "id": "loaded-unity-header-architecture",
+      "status": "observed",
+      "loadedElfMachine": 183,
+      "headersEqual": true,
+      "backingFileBuildId": "f048ec2098d0e7ed",
+      "guestProcessId": 3899,
+      "elapsedSeconds": 24.371,
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-module-catalog-20261014/HSR-4.6-MUMU_20261014_060404134/runtime/events.ndjson", "lines": [70, 71], "eventSequences": [3, 4]}],
+      "doesNotProve": ["loaded note or executable text equivalence", "factory ABI", "TypeTree ABI"]
+    },
+    {
+      "id": "module-snapshot-once-regression",
+      "status": "observed",
+      "loadedElfMachine": 183,
+      "headersEqual": true,
+      "guestProcessId": 5291,
+      "snapshotCount": 1,
+      "elapsedSeconds": 24.845,
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-module-catalog-once-20261014/HSR-4.6-MUMU_20261014_061045297/runtime/events.ndjson", "lines": [69], "eventSequences": [3]}]
+    },
+    {
+      "id": "hsr46-field-tree-and-identity-chain",
+      "status": "blocked",
+      "reason": "New-build native ABI and direct same-object calls have not been verified.",
+      "nativeTransferCalls": 0,
+      "fieldTreeFiles": 0,
+      "exactMaterialShaderBindings": 0
+    },
+    {
+      "id": "shader-fixture-source-scope",
+      "status": "confirmed",
+      "version": "4.5",
+      "eventId": 1720,
+      "constantComponentsChecked": 1352,
+      "evidence": [{"file": "artifacts/ShaderSamples/HSR-4.5/event1720/capture.json", "field": "events[0].eventId"}, {"file": "artifacts/ShaderSamples/HSR-4.5/event1720/unity-sample.json", "field": "constantComponentsChecked"}],
+      "doesNotProve": ["original Unity Material identity", "current 4.6 Shader compatibility"]
+    },
+    {
+      "id": "shader-source-texture-view",
+      "status": "confirmed",
+      "viewFormat": "R8G8B8A8_SRGB",
+      "resource": "ResourceId::4493",
+      "view": "ResourceId::4495",
+      "eventId": 1720,
+      "evidence": [{"file": "artifacts/ShaderSamples/HSR-4.5/event1720/raw/raw-draw.json", "field": "textures[0]"}]
+    },
+    {
+      "id": "shader-visual-acceptance",
+      "status": "blocked",
+      "reason": "Requires a fresh passing image comparison, not merely a compiled Shader.",
+      "evidence": [{"file": "artifacts/ShaderSamples/HSR-4.5/event1720/unity-validation.json"}]
+    }
+  ]
+}
