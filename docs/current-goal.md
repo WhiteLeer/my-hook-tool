@@ -2,14 +2,14 @@
 
 更新时间：2026-10-14。
 
-目标：从真实游戏数据完成一个材质的 Shader 还原闭环，再证明序列化资产、运行时对象与 RenderDoc Draw 的直接关联。
+目标：获取当前 HSR 版本的字段级 TypeTree，建立 AS 资产、运行时 Material/Shader 与 RenderDoc Draw 的直接关联，并流程化生成 Unity 可用的 ShaderLab；禁止猜测映射。
 
 ## 验收顺序
 
 1. 核对实际安装版本、运行库架构与构建标识，保存版本发现报告。活动 Profile 必须匹配这些证据；历史数据不得通过改名变成新版本证据。
 2. 选一个真实 Draw，保留 Vertex/Fragment 原始程序、反射、贴图、常量及渲染状态，生成调用真实程序的 Unity ShaderLab、材质与独立验证场景。
 3. 检查 Unity 编译、资源绑定和固定时间点渲染。编译成功不代表视觉一致；记录明确的差异和失败项。
-4. 用最小实验证明同一 Material/Shader 对象的 sourceFile#PathID、运行时身份及 Draw 关联。名称、地址、顺序、时间接近与 ResourceId 不作为跨来源身份依据。
+4. 验证新版本 Material/Shader 的非空字段树与 ABI，再用最小实验证明同一对象的 sourceFile#PathID、运行时身份及 Draw 关联。名称、地址、顺序、低位匹配、时间接近与 ResourceId 不作为跨来源身份依据。
 5. 至少三个不同程序样例通过回归后，再扩展批量导出与变体处理。
 
 ## 当前已核实基线
