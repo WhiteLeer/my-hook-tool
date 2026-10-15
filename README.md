@@ -521,8 +521,10 @@ native TypeTree 调用，不会把旧版本的 ABI 或地址当作 HSR 4.5 结�
 
 ## 分支
 
-- 当前工作目标：`HSR-4.5-MUMU`，只使用对应 Profile 和 `tools/Start-HSR-4.5-MuMuHook.bat`。
-- `SR-4.4-MUMU`：历史 HSR 4.4 归档分支，不再作为当前客户端目标。
-- `ZZZ-3.0-MUMU`：预留 ZZZ 3.0 运行时桥接配置，不复用 HSR 偏移或字段。
+- `main`：保留基础实现，不作为游戏定制开发分支。
+- `HSR`：长期维护的 HSR 开发分支，当前客户端目标为 4.6；使用活动 Profile 和通用启动入口，不以分支名推断运行时兼容性。
+- `ZZZ`：独立的 ZZZ 开发分支，目前仅保留 3.0 配置脚手架，尚未完成运行时验证；不复用 HSR 偏移或字段。
+- 版本更新保留独立 Profile、二进制哈希、ABI 检查和证据记录，不再新建带版本号的开发分支。`HSR-4.6-MUMU` 等 Profile ID 不是 Git 分支名，继续保留。
+- 原带版本号的分支提交保存为 `archive/branches/<原分支名>` 标签；历史 4.4/4.5 资料保留真实版本，不重新标记为 4.6。
 
 详细的事件格式和数据来源约束见 [`docs/runtime-bridge.md`](docs/runtime-bridge.md)。
