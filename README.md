@@ -1,56 +1,33 @@
-# my-hook-tool
+# my-hook-tool - ZZZ
 
-`my-hook-tool` 用于在 HSR/ZZZ 的运行时注入桥接模块，收集 Unity 对象层的
-Shader、Material、贴图、Renderer 和资源标识，并保存为 `.hook` 会话文件。
-当前先实现 `SR-4.4-MUMU`，`ZZZ-3.0-MUMU` 仅保留分支配置。
+## Status
 
-## 边界
+`ZZZ` is the long-lived Zenless Zone Zero development branch. It currently
+contains the ZZZ 3.0 profile scaffold and the initial session protocol, not a
+validated ZZZ runtime bridge. Do not treat an empty `.hook` session as Shader,
+Material or TypeTree recovery. HSR implementations and offsets are not copied
+into this branch.
 
-- 本工具当前不负责截取 RDC。
-- RenderDoc 只作为后续已有 `.srrdc` 离线分析器的输入，不参与本阶段注入。
-- TypeTree 只描述字段结构，不能代替运行时对象识别。
-- `.hook` 中的运行时记录必须由桥接模块写入；没有桥接模块时只生成会话壳，
-  不会伪造 Shader 或材质数据。
+## Branch And Version Policy
 
-## 构建
+- `main` preserves the initial baseline.
+- `HSR` and `ZZZ` are separate long-lived game development branches.
+- Client updates require version-specific profiles, binary hashes, ABI checks
+  and evidence; a branch name does not establish compatibility.
+- Former versioned branch tips are preserved as
+  `archive/branches/<former-name>` tags. Historical profile IDs, evidence and
+  existing release tags retain their original versions.
 
-```powershell
-& 'D:\Unpack_Workspace\Tools\dotnet\8\dotnet.exe' build `
-  '.\src\MyHookTool\MyHookTool.csproj' -c Release
-```
-
-## 注入会话
-
-对 Windows 目标进程以挂起方式启动，加载桥接 DLL 后恢复进程：
+## Build
 
 ```powershell
-& '.\src\MyHookTool\bin\Release\net8.0\my-hook-tool.exe' attach `
-  --profile '.\profiles\HSR-4.4-MUMU.json' `
-  --target 'D:\path\to\MuMuNxMain.exe' `
-  --module 'D:\path\to\hsr-runtime-bridge.dll' `
-  --output 'D:\Unpack_Workspace\HookSessions'
+dotnet build .\src\MyHookTool\MyHookTool.csproj -c Release
 ```
 
-也可以注入已经运行的进程：
+Use .NET 8. The profile scaffold is `profiles/ZZZ-3.0-MUMU.json`.
+There is currently no validated one-click ZZZ collection workflow in this
+branch. Runtime records require a real matching guest bridge; host session
+creation alone does not establish object identity or recover game data.
 
-```powershell
-my-hook-tool.exe attach --profile .\profiles\HSR-4.4-MUMU.json `
-  --target-pid 1234 --module .\hsr-runtime-bridge.dll `
-  --output .\HookSessions
-```
-
-命令会生成 `<session>/<session>.hook` 和
-`<session>/runtime/events.ndjson`。桥接模块按
-[`docs/runtime-bridge.md`](docs/runtime-bridge.md) 追加记录，之后执行：
-
-```powershell
-my-hook-tool.exe finalize '<session>\<session>.hook'
-my-hook-tool.exe inspect '<session>\<session>.hook'
-```
-
-## 分支
-
-- `SR-4.4-MUMU`：HSR 4.4 运行时桥接协议和注入配置。
-- `ZZZ-3.0-MUMU`：预留 ZZZ 3.0 运行时桥接配置，不复用 HSR 偏移或字段。
-
-详细的事件格式和数据来源约束见 [`docs/runtime-bridge.md`](docs/runtime-bridge.md)。
+See [`docs/runtime-bridge.md`](docs/runtime-bridge.md) for the session protocol
+and evidence boundaries.
