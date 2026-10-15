@@ -25,5 +25,6 @@ build-*/
 /runtime/**/*.ttbin
 /runtime/**/*.ttbin.report.json
 /runtime/**/*.typetree-report.json
+/runtime/
 /source-analysis-notes/
 /evidence-ledger*.json
