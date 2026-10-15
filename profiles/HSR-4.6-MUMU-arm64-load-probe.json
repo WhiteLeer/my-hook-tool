@@ -1,0 +1,19 @@
+{
+  "id": "HSR-4.6-MUMU",
+  "game": "HSR",
+  "version": "4.6",
+  "unity": "2019.4.34f1",
+  "runtimeSupport": "mumu",
+  "experimentalScope": "read-only-runtime-catalog",
+  "androidPackage": "com.miHoYo.hkrpg",
+  "mumuAndroidVersion": "auto",
+  "captureExtensions": [".srrdc"],
+  "alignmentPolicy": "explicit-only",
+  "guestRipperPath": "runtime/HSR-4.6-MUMU/catalog/libTypeTreeRipper.so",
+  "guestArm64RipperPath": "runtime/HSR-4.6-MUMU/entry-probe/libGuestFactoryProbe.so",
+  "observeClassIds": "21",
+  "scanReadonly": "1",
+  "scanStep": "8",
+  "factoryEntryProbe": {"enabled": false},
+  "notes": ["ARM64 companion load validation only; no game entry probe enabled."]
+}

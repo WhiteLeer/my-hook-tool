@@ -1,0 +1,6 @@
+UnityPy==1.25.0
+numpy==2.4.4
+Pillow==12.2.0
+lz4
+# Optional: only tools/unity_mcp_call.py needs the existing Unity MCP endpoint.
+mcp==1.26.0

@@ -2,10 +2,43 @@
   "id": "HSR-4.4-MUMU",
   "game": "HSR",
   "version": "4.4",
+  "runtimeSupport": "offline-only",
+  "observedClientVersion": "4.5.0",
+  "unity": "2019.4.34f1",
+  "typeTreeCompatibility": {
+    "revision": "2019.4.34",
+    "variant": "Runtime",
+    "evidence": "local HSR runtime TypeTree artifacts and Android package metadata"
+  },
+  "typeTreeBaseline": {
+    "file": "runtime/HSR-4.4-MUMU/typetree/hsr-2019.4.34-runtime-composite.ttbin",
+    "manifest": "runtime/HSR-4.4-MUMU/typetree/hsr-2019.4.34-runtime-composite.manifest.json",
+    "status": "offline_baseline",
+    "size": 1054613,
+    "sha256": "766b6ea526088da43422902a8deedcdcb0ceb6318e23186723ee433bc5f1e45a",
+    "treeCount": 320,
+    "totalNodes": 21143,
+    "revision": "2019.4.34",
+    "variant": "Runtime"
+  },
   "captureExtensions": [ ".srrdc" ],
   "renderDocExportFormat": "RenderDocShaderExport/2",
   "typeTreeProvider": "TypeTreeRipper",
   "typeTreeFormats": [ ".ttbin", ".tpk", ".txt" ],
+  "androidPackage": "com.miHoYo.hkrpg",
+  "renderDocTargetName": "MuMuNxDevice",
+  "renderDocHookChildren": true,
+  "renderDocRefAllResources": true,
+  "captureEnvironment": {
+    "RENDERDOC_CAPTURE_OFFSCREEN_SUBMIT": "1"
+  },
+  "guestTypeTreeFormat": "TypeTreeRipper.runtime-catalog.v1",
+  "guestRipperPath": "runtime/HSR-4.4-MUMU/libTypeTreeRipper.so",
+  "factorySkipClassIds": [ 4 ],
+  "observeClassIds": "0,1,2,4,20,21,23,25,33,43,48,74,120,137,198,199,330",
+  "observeVtableOffset": "0xA0",
+  "guestEventMaxSeconds": 360,
+  "guestEventIdleSeconds": 20,
   "alignmentPolicy": "explicit-only",
   "notes": [
     "RenderDoc ResourceId is capture-local and is not an AS PathID.",

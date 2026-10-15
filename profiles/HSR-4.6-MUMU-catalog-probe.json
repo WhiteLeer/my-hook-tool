@@ -1,0 +1,38 @@
+{
+  "id": "HSR-4.6-MUMU",
+  "game": "HSR",
+  "version": "4.6",
+  "unity": "2019.4.34f1",
+  "runtimeSupport": "mumu",
+  "experimentalScope": "read-only-runtime-catalog",
+  "androidPackage": "com.miHoYo.hkrpg",
+  "mumuAndroidVersion": "auto",
+  "captureExtensions": [ ".srrdc" ],
+  "alignmentPolicy": "explicit-only",
+  "guestRipperPath": "runtime/HSR-4.6-MUMU/catalog/libTypeTreeRipper.so",
+  "observeClassIds": "21",
+  "vtableProbe": "0",
+  "scanReadonly": "1",
+  "scanStep": "8",
+  "captureTransferWords": false,
+  "contextObserver": false,
+  "captureTransferCallers": false,
+  "autoEnter": false,
+  "guestTotalTimeoutSeconds": 60,
+  "guestEventMaxSeconds": 2,
+  "guestEventIdleSeconds": 1,
+  "targetLibrarySha256": "867e896398bef4225ddc7b07c062f686fed0af9d321eb980d1335ad01f688f9e",
+  "targetLibraryBuildId": "f048ec2098d0e7ed",
+  "readOnlyRttiLayout": {
+    "scope": "Compiled collector source layout contract, not target ABI validation",
+    "structureBytes": 80,
+    "factoryPointerOffset": 8,
+    "typeIdOffset": 40,
+    "sizeOffset": 44
+  },
+  "notes": [
+    "Experimental RTTI catalog only. The host must emit catalog_only=1.",
+    "No old RVA, native Transfer, vtable probe or factory call is authorized by this profile.",
+    "Catalog rows do not establish field-level TypeTrees, Shader names or Material/Draw identities."
+  ]
+}

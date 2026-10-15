@@ -49,6 +49,72 @@
       "evidence": [{"file": "artifacts/HookSessions/hsr46-module-catalog-once-20261014/HSR-4.6-MUMU_20261014_061045297/runtime/events.ndjson", "lines": [69], "eventSequences": [3]}]
     },
     {
+      "id": "hsr46-readonly-candidate-code-windows",
+      "status": "confirmed",
+      "scope": "512-byte runtime/guest-disk/local-ELF windows only, not complete function or module identity",
+      "types": [21, 48, 108],
+      "guestProcessId": 11436,
+      "librarySha256": "867e896398bef4225ddc7b07c062f686fed0af9d321eb980d1335ad01f688f9e",
+      "elapsedSeconds": 23.086,
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-three-class-rtti-20261014/HSR-4.6-MUMU_20261014_064657501/runtime/events.ndjson", "lines": [71, 72, 73], "eventSequences": [4, 5, 6]}, {"file": "artifacts/HookSessions/hsr46-three-class-rtti-20261014/HSR-4.6-MUMU_20261014_064657501/runtime/rtti-code-audit.json"}],
+      "doesNotProve": ["factory ABI", "factory invocation", "TypeTree fields", "asset identity"]
+    },
+    {
+      "id": "hsr46-readonly-material-code-repeat",
+      "status": "confirmed",
+      "guestProcessId": 10256,
+      "codeSha256": "b5838398faee60c578e4a015bccb0a8f96ab5660c6b2b29669188b89c968b01a",
+      "elapsedSeconds": 22.534,
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-rtti-repeat-20261014/HSR-4.6-MUMU_20261014_064543287/runtime/events.ndjson", "lines": [70], "eventSequences": [4]}]
+    },
+    {
+      "id": "hsr46-memory-read-method-boundary",
+      "status": "observed",
+      "processVmReadErrno": 22,
+      "selfMemReadBytes": [80, 512],
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-rtti-read-method-20261014/HSR-4.6-MUMU_20261014_064334084/runtime/events.ndjson", "lines": [71], "eventSequences": [4]}]
+    },
+    {
+      "id": "hsr46-material-factory-signature",
+      "status": "hypothesis",
+      "candidateElfVaddr": "0x221fc2c",
+      "reason": "Current disassembly initializes a 264-byte object using low bits of x0, but does not prove the full two-argument declaration, thread/registration requirements or cleanup.",
+      "evidence": [{"file": "artifacts/Updates/HSR-4.6/libraries/libunity.so", "elfVaddrRange": ["0x221fc2c", "0x221fd3c"]}]
+    },
+    {
+      "id": "hsr46-natural-factory-entry-calls",
+      "status": "confirmed",
+      "scope": "Actual ARM64 candidate entry callbacks during startup; not returned object, complete factory ABI or identity bridge",
+      "runs": [{"guestProcessId": 17109, "records": 93, "dropped": 0, "elapsedSeconds": 50.685}, {"guestProcessId": 18626, "records": 93, "dropped": 0}, {"guestProcessId": 21997, "records": 93, "dropped": 0}],
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-factory-entry-20261014/HSR-4.6-MUMU_20261014_073821411/runtime/events.ndjson", "lines": [83, 84, 89, 192], "eventSequences": [1, 2, 3, 96], "producer": "GuestFactoryProbe"}, {"file": "artifacts/HookSessions/hsr46-entry-final-regression-20261014/HSR-4.6-MUMU_20261014_080635812/runtime/events.ndjson", "lines": [83, 89, 193], "eventSequences": [1, 3, 97], "producer": "GuestFactoryProbe"}],
+      "doesNotProve": ["Material return identity", "Material to Shader reference", "sourceFile#PathID", "RenderDoc EID", "field-level TypeTree"]
+    },
+    {
+      "id": "hsr46-caller-code-window",
+      "status": "confirmed",
+      "scope": "Current mapped code window and BLR instruction only; LR does not exclude a tail-call chain",
+      "candidateElfVaddr": "0x1ca3f60",
+      "candidateFileOffset": "0x1c9ff60",
+      "codeHex": "00013fd6f30300aa800b00b476050034",
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-factory-caller-20261014/HSR-4.6-MUMU_20261014_074447959/runtime/events.ndjson", "lines": [89], "eventSequences": [3], "producer": "GuestFactoryProbe", "guestProcessId": 18626}]
+    },
+    {
+      "id": "hsr46-owned-bridge-lr-sp-control",
+      "status": "confirmed",
+      "scope": "Owned bridge extraction contract tested using independent assembly expectations, not game parameter semantics",
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-entry-final-regression-20261014/HSR-4.6-MUMU_20261014_080635812/runtime/events.ndjson", "lines": [83], "eventSequences": [1]}]
+    },
+    {
+      "id": "hsr46-owned-code-write-fault-rejection",
+      "status": "confirmed",
+      "scope": "One controlled executable-write failure, not exhaustive OS failure testing",
+      "guestProcessId": 20657,
+      "dobbyStatus": -2,
+      "gameEntryInstalled": false,
+      "elapsedSeconds": 26.621,
+      "evidence": [{"file": "artifacts/HookSessions/hsr46-owned-write-fault-20261014/HSR-4.6-MUMU_20261014_080323628/runtime/events.ndjson", "lines": [90, 91], "eventSequences": [1, 2]}]
+    },
+    {
       "id": "hsr46-field-tree-and-identity-chain",
       "status": "blocked",
       "reason": "New-build native ABI and direct same-object calls have not been verified.",

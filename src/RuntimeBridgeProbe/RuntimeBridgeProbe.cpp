@@ -54,7 +54,11 @@ void WriteProbeRecord(HMODULE module)
         << JsonEscape(GetEnvironment("MY_HOOK_PROFILE")) << "\"},"
         << "\"payload\":{\"processId\":" << GetCurrentProcessId()
         << ",\"modulePath\":\"" << JsonEscape(GetModulePath(module))
-        << "\",\"dataStatus\":\"probe_only\"}}\n";
+        << "\",\"dataStatus\":\"probe_only\"";
+    const auto captureSessionId = GetEnvironment("MY_HOOK_CAPTURE_SESSION_ID");
+    if (!captureSessionId.empty())
+        output << ",\"captureSessionId\":\"" << JsonEscape(captureSessionId) << "\"";
+    output << "}}\n";
 }
 
 DWORD WINAPI ProbeThread(void *parameter)

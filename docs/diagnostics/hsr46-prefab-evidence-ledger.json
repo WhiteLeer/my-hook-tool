@@ -1,0 +1,94 @@
+{
+  "schema": "my-hook.evidence-ledger.v1",
+  "scope": "HSR-4.6 bounded static particle schema and display experiment, not runtime identity or game visual acceptance",
+  "confirmed": [
+    {
+      "claim": "LinkGo exported coverage accounts separately for candidate prefix and opaque bytes",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/prefab-linkgo/preflight.json",
+      "object": "c98c2440efc4cac43845e2e8db08100d#4",
+      "objectBytes": 8616,
+      "candidateParsedBytes": 216,
+      "unmappedBytes": 8400,
+      "eventId": null
+    },
+    {
+      "claim": "Gold prefab external-file closure includes concatenated split files with verified serialized header sizes",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/prefab-gold-header-verified/closure.json",
+      "files": 19,
+      "bytes": 20960848,
+      "eventId": null
+    },
+    {
+      "claim": "Two real packages rejected before invoking the legacy Unity importer",
+      "evidence": [
+        "artifacts/StaticShaderSamples/HSR-4.6/prefab-linkgo/preflight.json",
+        "artifacts/StaticShaderSamples/HSR-4.6/prefab-gold-complete/preflight.json"
+      ],
+      "eventId": null
+    },
+    {
+      "claim": "Historical 4.5 original schema contains curveTension absent from the 4.4 merged tree; generated candidate losslessly retains all native nodes",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/schema-candidates/native45-particle-exact.structs.provenance.json",
+      "schemaOriginVersion": "4.5",
+      "nativeNodes": 4439,
+      "absentMergedNode": "Base.TrailModule.curveTension",
+      "eventId": null
+    },
+    {
+      "claim": "Eleven current APK ParticleSystem objects strictly consume their original lengths using the candidate schema",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/schema-traces/current11/",
+      "boundary": "candidate layout compatibility, not current runtime schema capture or complete game coverage",
+      "eventId": null
+    },
+    {
+      "claim": "Independent bounded trace and AS agree on 7450 values across six Gold components, with reverse GameObject ownership and nonempty pointer target classes verified",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/schema-traces/gold-independent/comparison.json",
+      "nonemptyPointers": 9,
+      "nullPointers": 89,
+      "eventId": null
+    },
+    {
+      "claim": "1531 source-derived mapped-value assertions survive Unity apply and prefab reload; fixed-time repeat and saved-scene image are identical",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/particle-effect-validation/validation.json",
+      "boundary": "particle-only display adapter, not full UI prefab or visual parity",
+      "eventId": null
+    }
+  ],
+  "observed": [
+    {
+      "claim": "No embedded ParticleSystem or ParticleSystemRenderer TypeTree in the APK particle candidates",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/prefab-candidates-safe/inventory.json",
+      "particleSystems": 11,
+      "eventId": null
+    },
+    {
+      "claim": "Historical external schema overreads Gold particle objects, despite full file dependency closure",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/prefab-gold-complete/preflight.json",
+      "objects": ["ced5e536bf817f5488c8e270610660f2#11", "ced5e536bf817f5488c8e270610660f2#12", "ced5e536bf817f5488c8e270610660f2#13"],
+      "eventId": null
+    },
+    {
+      "claim": "Start SRAM segment0 row4 matches known startup block content digest and size after observed 32-bit word byte-order conversion",
+      "evidence": "artifacts/StaticShaderSamples/HSR-4.6/asb-catalog/Start_AsbV_361d139e1e4d7dded99d3cdd4d8feccf.bytes",
+      "recordOffset": "0x108",
+      "blockMd5": "33e698b3983400b700eb543162f21d36",
+      "blockBytes": 238134,
+      "identityBoundary": "file content verification only, not Unity PathID or runtime identity",
+      "eventId": null
+    }
+  ],
+  "hypothesis": [
+    {
+      "claim": "Candidate schema may also decode current gameplay effect objects",
+      "requiredExperiment": "independent bounded trace, pointer closure and active-field checks on a same-version gameplay prefab",
+      "notAccepted": "UI fixture byte count alone"
+    }
+  ],
+  "blocked": [
+    "Full custom particle/renderer field behavior and gameplay-effect compatibility",
+    "UIParticle, SmoothMask and UI layout behavior",
+    "CAB-to-block or prefab-path-to-block semantics of the remaining SRAM segments",
+    "Faithful larger-effect Unity preview",
+    "Character rendering and Timeline are not claimed as extracted or verified"
+  ]
+}

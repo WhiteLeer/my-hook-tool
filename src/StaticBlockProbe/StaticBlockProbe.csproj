@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AsBin Condition="'$(AsBin)' == ''">$(MSBuildProjectDirectory)/../../../../Base_AS/AnimeStudio-master/AnimeStudio.CLI/bin/Release/net8.0-windows</AsBin>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AnimeStudio"><HintPath>$(AsBin)/AnimeStudio.dll</HintPath></Reference>
+    <Reference Include="AnimeStudio.Utility"><HintPath>$(AsBin)/AnimeStudio.Utility.dll</HintPath></Reference>
+    <Content Include="$(AsBin)/*.dll"><Link>%(Filename)%(Extension)</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+    <Content Include="$(AsBin)/x64/*.dll"><Link>x64/%(Filename)%(Extension)</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></Content>
+  </ItemGroup>
+</Project>

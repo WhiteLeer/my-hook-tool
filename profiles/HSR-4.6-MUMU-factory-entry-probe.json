@@ -1,0 +1,27 @@
+{
+  "id": "HSR-4.6-MUMU",
+  "game": "HSR",
+  "version": "4.6",
+  "unity": "2019.4.34f1",
+  "runtimeSupport": "mumu",
+  "experimentalScope": "passive-factory-entry",
+  "androidPackage": "com.miHoYo.hkrpg",
+  "mumuAndroidVersion": "auto",
+  "captureExtensions": [".srrdc"],
+  "alignmentPolicy": "explicit-only",
+  "guestRipperPath": "runtime/HSR-4.6-MUMU/catalog/libTypeTreeRipper.so",
+  "guestArm64RipperPath": "runtime/HSR-4.6-MUMU/entry-probe/libGuestFactoryProbe.so",
+  "observeClassIds": "21",
+  "scanReadonly": "1",
+  "scanStep": "8",
+  "factoryEntryProbe": {
+    "enabled": true,
+    "buildId": "f048ec2098d0e7ed",
+    "elfVaddr": "0x221fc2c",
+    "codeHex": "fe0f1ef8f44f01a9d45c00f0f30300aa"
+  },
+  "notes": [
+    "One ARM64 entry probe observes only natural game calls; no artificial factory invocation, return-site patch or TypeTree generation.",
+    "Current-build code contract from verified runtime/disk/local ELF. This is not a complete factory ABI declaration."
+  ]
+}

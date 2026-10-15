@@ -1,0 +1,11 @@
+{
+  "displayMode":"native",
+  "times":[0.033333335,0.083333336,0.16666667,0.25,0.5,1.4],
+  "sampleTime":0.083333336,
+  "visibleTimes":[0.033333335,0.083333336,0.16666667,0.25],
+  "emptyTimes":[0.5,1.4],
+  "cameraSize":6,
+  "cameraZ":-10,
+  "cameraFar":100,
+  "cycleDuration":1.6
+}

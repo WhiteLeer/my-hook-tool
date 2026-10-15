@@ -1,0 +1,20 @@
+{
+  "schema": "my-hook.isolated-battle-environment.v1",
+  "status": "preview_fixture_not_recovered_game_state",
+  "parameters": {
+    "_ES_EP_Enable": {"type":"Float","value":0,"reason":"Preview disables eye-protection position override."},
+    "_HideNPCParts": {"type":"Float","value":0,"reason":"Preview does not apply gameplay part masks."},
+    "_OneMinusOpacityDitherScale": {"type":"Float","value":0,"reason":"Neutral opacity-dither scale for isolated preview."},
+    "_SplitUVTrans": {"type":"Vector","value":[0,0,0,0],"reason":"Unsplit camera viewport; UV transform identity in original arithmetic."},
+    "_FarClip": {"type":"Float","value":100,"reason":"Must equal the standalone preview camera farClipPlane."},
+    "_GlobalOneMinusAvatarIntensityEnable": {"type":"Float","value":0,"reason":"Disable gameplay avatar intensity suppression."},
+    "_OneMinusGlobalMainIntensityEnable": {"type":"Float","value":0,"reason":"Disable gameplay main intensity suppression."},
+    "_GlobalOneMinusAvatarIntensity": {"type":"Float","value":0,"reason":"Neutral gameplay suppression; not recovered."},
+    "_OneMinusGlobalMainIntensity": {"type":"Float","value":0,"reason":"Neutral gameplay suppression; not recovered."},
+    "_ES_EP_EffectParticleTop": {"type":"Float","value":2,"reason":"Nondegenerate preview eye-protection interval; actual game value unknown."},
+    "_ES_EP_EffectParticleBottom": {"type":"Float","value":1,"reason":"Nondegenerate preview eye-protection interval; actual game value unknown."},
+    "_ES_EP_EffectParticle": {"type":"Float","value":0,"reason":"Neutral eye-protection mix; not recovered."},
+    "_ES_EffectIntensityScale": {"type":"Float","value":1,"reason":"Neutral environment emission multiplier; not recovered."},
+    "_HalfDepth01Tex": {"type":"Texture","value":"white","reason":"No opaque occluders: normalized linear scene depth equals far plane."}
+  }
+}
